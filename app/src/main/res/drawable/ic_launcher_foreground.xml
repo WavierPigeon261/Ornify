@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Stylized jewellery diamond/ring icon in gold -->
+    <path
+        android:fillColor="#D4AF37"
+        android:pathData="M54,28 L68,44 L54,80 L40,44 Z" />
+    <path
+        android:fillColor="#F9E79F"
+        android:pathData="M54,28 L68,44 L54,44 Z" />
+    <path
+        android:fillColor="#E5C158"
+        android:pathData="M40,44 L54,44 L54,80 Z" />
+    <path
+        android:fillColor="#B38F26"
+        android:pathData="M54,44 L68,44 L54,80 Z" />
+</vector>
