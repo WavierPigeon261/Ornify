@@ -1,4 +1,4 @@
-# 💍 Jewellery Shop Orders Android App
+# Ornify - Jewellery Shop Orders Android App
 
 A tailor-made, easy-to-use Android application designed for jewellery shop owners to record and track customer orders, specifications, delivery dates, and photo references.
 
