@@ -1,4 +1,4 @@
-package com.jewellery.shoporders.ui.screens
+package com.sourabhtech.ornify.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -24,6 +24,8 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.CurrencyRupee
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Diamond
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -51,19 +53,18 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
-import com.jewellery.shoporders.data.Order
-import com.jewellery.shoporders.ui.theme.GoldDark
-import com.jewellery.shoporders.ui.theme.GoldLight
-import com.jewellery.shoporders.ui.theme.GoldWarm
-import com.jewellery.shoporders.ui.theme.StatusCompleted
-import com.jewellery.shoporders.util.DateUtils
+import com.sourabhtech.ornify.data.Order
+import com.sourabhtech.ornify.ui.theme.StatusCompleted
+import com.sourabhtech.ornify.util.DateUtils
 import java.io.File
 
 @Composable
 fun OrderDetailsDialog(
     order: Order,
     onDismiss: () -> Unit,
+    onEdit: (Order) -> Unit,
     onMarkCompleted: (Order) -> Unit,
+    onReopen: (Order) -> Unit,
     onDelete: (Order) -> Unit
 ) {
     var enlargedImagePath by remember { mutableStateOf<String?>(null) }
@@ -84,21 +85,36 @@ fun OrderDetailsDialog(
                     .padding(20.dp)
                     .verticalScroll(rememberScrollState())
             ) {
-                // Top row with close button
+                // Top row with dates and close button
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.Top
                 ) {
-                    // Placed on [date] in italic style at the very top
-                    Text(
-                        text = "Placed on ${DateUtils.formatPlacedDate(order.placedAtMillis)}",
-                        style = MaterialTheme.typography.bodyMedium.copy(
-                            fontStyle = FontStyle.Italic,
-                            color = MaterialTheme.colorScheme.primary,
-                            fontWeight = FontWeight.Medium
+                    Column(modifier = Modifier.weight(1f)) {
+                        // Placed on [date] in italic style at the very top
+                        Text(
+                            text = "Placed on ${DateUtils.formatPlacedDate(order.placedAtMillis)}",
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                fontStyle = FontStyle.Italic,
+                                color = MaterialTheme.colorScheme.primary,
+                                fontWeight = FontWeight.Medium
+                            )
                         )
-                    )
+
+                        // If modified, show Modified on [date] in italic below it
+                        if (order.modifiedAtMillis != null) {
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                text = "Modified on ${DateUtils.formatModifiedDate(order.modifiedAtMillis)}",
+                                style = MaterialTheme.typography.bodySmall.copy(
+                                    fontStyle = FontStyle.Italic,
+                                    color = MaterialTheme.colorScheme.secondary,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            )
+                        }
+                    }
 
                     IconButton(
                         onClick = onDismiss,
@@ -118,7 +134,7 @@ fun OrderDetailsDialog(
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(
-                        containerColor = GoldWarm.copy(alpha = 0.12f)
+                        containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
                     ),
                     shape = RoundedCornerShape(16.dp)
                 ) {
@@ -127,7 +143,7 @@ fun OrderDetailsDialog(
                             Icon(
                                 imageVector = Icons.Default.Diamond,
                                 contentDescription = null,
-                                tint = GoldDark,
+                                tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(24.dp)
                             )
                             Spacer(modifier = Modifier.width(8.dp))
@@ -143,12 +159,12 @@ fun OrderDetailsDialog(
                         if (!order.subCategory.isNullOrBlank()) {
                             Spacer(modifier = Modifier.height(6.dp))
                             Surface(
-                                color = GoldDark,
+                                color = MaterialTheme.colorScheme.primary,
                                 shape = RoundedCornerShape(8.dp)
                             ) {
                                 Text(
                                     text = order.subCategory,
-                                    color = Color.White,
+                                    color = MaterialTheme.colorScheme.onPrimary,
                                     style = MaterialTheme.typography.labelMedium.copy(
                                         fontWeight = FontWeight.Bold
                                     ),
@@ -208,11 +224,30 @@ fun OrderDetailsDialog(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // Actions: Mark as Completed & Delete
+                // Action buttons: Edit, Delete, and Complete/Reopen
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
+                    // Edit Button
+                    OutlinedButton(
+                        onClick = {
+                            onDismiss()
+                            onEdit(order)
+                        },
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Edit,
+                            contentDescription = "Edit Order",
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text("Edit")
+                    }
+
+                    // Delete Button
                     OutlinedButton(
                         onClick = { onDelete(order) },
                         modifier = Modifier.weight(1f),
@@ -224,27 +259,47 @@ fun OrderDetailsDialog(
                         Icon(
                             imageVector = Icons.Default.Delete,
                             contentDescription = null,
-                            modifier = Modifier.size(18.dp)
+                            modifier = Modifier.size(16.dp)
                         )
-                        Spacer(modifier = Modifier.width(6.dp))
+                        Spacer(modifier = Modifier.width(4.dp))
                         Text("Delete")
                     }
 
-                    Button(
-                        onClick = { onMarkCompleted(order) },
-                        modifier = Modifier.weight(1.3f),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = StatusCompleted
-                        )
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.CheckCircle,
-                            contentDescription = null,
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text("Complete")
+                    // Complete / Reopen Button
+                    if (order.isCompleted) {
+                        Button(
+                            onClick = { onReopen(order) },
+                            modifier = Modifier.weight(1.2f),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.secondary
+                            )
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Replay,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("Reopen")
+                        }
+                    } else {
+                        Button(
+                            onClick = { onMarkCompleted(order) },
+                            modifier = Modifier.weight(1.2f),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = StatusCompleted
+                            )
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.CheckCircle,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("Complete")
+                        }
                     }
                 }
             }
@@ -297,14 +352,14 @@ private fun DetailRow(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
-            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f))
+            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f))
             .padding(14.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
             imageVector = icon,
             contentDescription = null,
-            tint = GoldDark,
+            tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier.size(24.dp)
         )
         Spacer(modifier = Modifier.width(12.dp))
@@ -319,7 +374,7 @@ private fun DetailRow(
                 text = value,
                 style = MaterialTheme.typography.titleMedium.copy(
                     fontWeight = if (isHighlight) FontWeight.Bold else FontWeight.Medium,
-                    color = if (isHighlight) GoldDark else MaterialTheme.colorScheme.onSurface,
+                    color = if (isHighlight) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
                     fontSize = if (isHighlight) 18.sp else 16.sp
                 )
             )

@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.jewellery.shoporders"
+    namespace = "com.sourabhtech.ornify"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.jewellery.shoporders"
+        applicationId = "com.sourabhtech.ornify"
         minSdk = 26
         targetSdk = 34
         versionCode = 1

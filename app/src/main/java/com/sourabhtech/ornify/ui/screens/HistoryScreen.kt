@@ -1,4 +1,4 @@
-package com.jewellery.shoporders.ui.screens
+package com.sourabhtech.ornify.ui.screens
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -18,27 +18,31 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.CurrencyRupee
+import androidx.compose.material.icons.filled.DeleteSweep
 import androidx.compose.material.icons.filled.Diamond
-import androidx.compose.material.icons.filled.Image
-import androidx.compose.material.icons.filled.Inbox
+import androidx.compose.material.icons.filled.History
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -49,64 +53,61 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.jewellery.shoporders.data.Order
-import com.jewellery.shoporders.ui.OrderViewModel
-import com.jewellery.shoporders.ui.theme.GoldDark
-import com.jewellery.shoporders.ui.theme.GoldLight
-import com.jewellery.shoporders.ui.theme.GoldWarm
-import com.jewellery.shoporders.util.DateUtils
+import com.sourabhtech.ornify.data.Order
+import com.sourabhtech.ornify.ui.OrderViewModel
+import com.sourabhtech.ornify.ui.theme.StatusCompleted
+import com.sourabhtech.ornify.util.DateUtils
 import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DashboardScreen(
+fun HistoryScreen(
     viewModel: OrderViewModel,
-    onNavigateToNewOrder: () -> Unit
+    onNavigateBack: () -> Unit,
+    onNavigateToEdit: () -> Unit
 ) {
-    val pendingOrders by viewModel.pendingOrders.collectAsState()
+    val completedOrders by viewModel.completedOrders.collectAsState()
     val selectedOrder by viewModel.selectedOrder.collectAsState()
+    var showClearHistoryDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Default.Diamond,
-                            contentDescription = null,
-                            tint = Color.White,
-                            modifier = Modifier.size(26.dp)
+                    Text(
+                        text = "Order History",
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onPrimary
                         )
-                        Spacer(modifier = Modifier.width(10.dp))
-                        Text(
-                            text = "Jewellery Shop Orders",
-                            style = MaterialTheme.typography.titleLarge.copy(
-                                fontWeight = FontWeight.Bold,
-                                color = Color.White
-                            )
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = onNavigateBack) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Back to Dashboard",
+                            tint = MaterialTheme.colorScheme.onPrimary
                         )
                     }
                 },
+                actions = {
+                    if (completedOrders.isNotEmpty()) {
+                        IconButton(
+                            onClick = { showClearHistoryDialog = true }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.DeleteSweep,
+                                contentDescription = "Delete History",
+                                tint = MaterialTheme.colorScheme.onPrimary
+                            )
+                        }
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = GoldDark
+                    containerColor = MaterialTheme.colorScheme.primary
                 )
             )
-        },
-        floatingActionButton = {
-            // Rounded plus icon on the bottom right corner
-            FloatingActionButton(
-                onClick = onNavigateToNewOrder,
-                shape = CircleShape,
-                containerColor = GoldDark,
-                contentColor = Color.White,
-                modifier = Modifier.padding(8.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "Create New Order",
-                    modifier = Modifier.size(28.dp)
-                )
-            }
         }
     ) { paddingValues ->
         Box(
@@ -114,8 +115,8 @@ fun DashboardScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            if (pendingOrders.isEmpty()) {
-                // Empty state: "No pending orders"
+            if (completedOrders.isEmpty()) {
+                // Empty State
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
@@ -125,14 +126,14 @@ fun DashboardScreen(
                 ) {
                     Surface(
                         shape = CircleShape,
-                        color = GoldWarm.copy(alpha = 0.15f),
+                        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
                         modifier = Modifier.size(90.dp)
                     ) {
                         Box(contentAlignment = Alignment.Center) {
                             Icon(
-                                imageVector = Icons.Default.Inbox,
+                                imageVector = Icons.Default.History,
                                 contentDescription = null,
-                                tint = GoldDark,
+                                tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(46.dp)
                             )
                         }
@@ -141,7 +142,7 @@ fun DashboardScreen(
                     Spacer(modifier = Modifier.height(20.dp))
 
                     Text(
-                        text = "No pending orders",
+                        text = "No order history yet",
                         style = MaterialTheme.typography.headlineMedium.copy(
                             fontWeight = FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.onSurface
@@ -152,7 +153,7 @@ fun DashboardScreen(
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Text(
-                        text = "Tap the + button below to create your first order.",
+                        text = "Completed orders will be saved here for your reference.",
                         style = MaterialTheme.typography.bodyMedium.copy(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         ),
@@ -160,7 +161,6 @@ fun DashboardScreen(
                     )
                 }
             } else {
-                // Pending orders list
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(16.dp),
@@ -175,7 +175,7 @@ fun DashboardScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "Pending Orders (${pendingOrders.size})",
+                                text = "Completed Orders (${completedOrders.size})",
                                 style = MaterialTheme.typography.titleMedium.copy(
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.onSurface
@@ -185,37 +185,69 @@ fun DashboardScreen(
                     }
 
                     items(
-                        items = pendingOrders,
+                        items = completedOrders,
                         key = { it.id }
                     ) { order ->
-                        OrderCardItem(
+                        HistoryCardItem(
                             order = order,
                             onClick = { viewModel.selectOrder(order) }
                         )
-                    }
-
-                    // Spacer at bottom so FAB doesn't obscure the last card
-                    item {
-                        Spacer(modifier = Modifier.height(80.dp))
                     }
                 }
             }
         }
     }
 
-    // Show details dialog if an order is selected
+    // Confirmation dialog for clearing history
+    if (showClearHistoryDialog) {
+        AlertDialog(
+            onDismissRequest = { showClearHistoryDialog = false },
+            title = {
+                Text(
+                    text = "Delete All History?",
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            text = {
+                Text("This will permanently remove all completed orders from the history panel. Are you sure?")
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.clearHistory()
+                        showClearHistoryDialog = false
+                    }
+                ) {
+                    Text("Delete All", color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showClearHistoryDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+
+    // Details dialog if an order is selected
     selectedOrder?.let { order ->
         OrderDetailsDialog(
             order = order,
             onDismiss = { viewModel.selectOrder(null) },
+            onEdit = {
+                viewModel.setOrderToEdit(it)
+                viewModel.selectOrder(null)
+                onNavigateToEdit()
+            },
             onMarkCompleted = { viewModel.markOrderCompleted(it) },
+            onReopen = { viewModel.reopenOrder(it) },
             onDelete = { viewModel.deleteOrder(it) }
         )
     }
 }
 
 @Composable
-fun OrderCardItem(
+private fun HistoryCardItem(
     order: Order,
     onClick: () -> Unit
 ) {
@@ -235,7 +267,6 @@ fun OrderCardItem(
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // First attached image thumbnail or diamond icon placeholder
             if (order.imagePaths.isNotEmpty()) {
                 AsyncImage(
                     model = File(order.imagePaths.first()),
@@ -248,14 +279,14 @@ fun OrderCardItem(
             } else {
                 Surface(
                     shape = RoundedCornerShape(12.dp),
-                    color = GoldWarm.copy(alpha = 0.15f),
+                    color = StatusCompleted.copy(alpha = 0.15f),
                     modifier = Modifier.size(64.dp)
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Icon(
-                            imageVector = Icons.Default.Diamond,
+                            imageVector = Icons.Default.CheckCircle,
                             contentDescription = null,
-                            tint = GoldDark,
+                            tint = StatusCompleted,
                             modifier = Modifier.size(30.dp)
                         )
                     }
@@ -265,7 +296,6 @@ fun OrderCardItem(
             Spacer(modifier = Modifier.width(14.dp))
 
             Column(modifier = Modifier.weight(1f)) {
-                // Category & subcategory tags
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         text = order.orderType,
@@ -282,14 +312,13 @@ fun OrderCardItem(
                         text = order.subCategory,
                         style = MaterialTheme.typography.bodySmall.copy(
                             fontWeight = FontWeight.SemiBold,
-                            color = GoldDark
+                            color = MaterialTheme.colorScheme.primary
                         )
                     )
                 }
 
                 Spacer(modifier = Modifier.height(6.dp))
 
-                // Price and Deliver by date
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -299,24 +328,22 @@ fun OrderCardItem(
                         text = DateUtils.formatCurrency(order.approximatePrice),
                         style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.Bold,
-                            color = GoldDark,
+                            color = MaterialTheme.colorScheme.primary,
                             fontSize = 17.sp
                         )
                     )
 
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Default.CalendarToday,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(13.dp)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
+                    Surface(
+                        color = StatusCompleted.copy(alpha = 0.15f),
+                        shape = RoundedCornerShape(6.dp)
+                    ) {
                         Text(
-                            text = DateUtils.formatDate(order.deliveryDateMillis),
-                            style = MaterialTheme.typography.bodySmall.copy(
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+                            text = "Completed",
+                            color = StatusCompleted,
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                fontWeight = FontWeight.Bold
+                            ),
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
                         )
                     }
                 }

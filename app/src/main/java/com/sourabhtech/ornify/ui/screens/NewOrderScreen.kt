@@ -1,4 +1,4 @@
-package com.jewellery.shoporders.ui.screens
+package com.sourabhtech.ornify.ui.screens
 
 import android.Manifest
 import android.content.pm.PackageManager
@@ -55,6 +55,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -72,12 +73,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import coil.compose.AsyncImage
-import com.jewellery.shoporders.ui.OrderViewModel
-import com.jewellery.shoporders.ui.theme.GoldDark
-import com.jewellery.shoporders.ui.theme.GoldLight
-import com.jewellery.shoporders.ui.theme.GoldWarm
-import com.jewellery.shoporders.util.DateUtils
-import com.jewellery.shoporders.util.ImageStorageUtils
+import com.sourabhtech.ornify.ui.OrderViewModel
+import com.sourabhtech.ornify.util.DateUtils
+import com.sourabhtech.ornify.util.ImageStorageUtils
 import java.io.File
 import java.util.Calendar
 
@@ -88,6 +86,8 @@ fun NewOrderScreen(
     onNavigateBack: () -> Unit
 ) {
     val context = LocalContext.current
+    val orderToEdit by viewModel.orderToEdit.collectAsState()
+    val isEditMode = orderToEdit != null
 
     // Category options
     val primaryCategories = listOf(
@@ -102,26 +102,36 @@ fun NewOrderScreen(
         "Chain"
     )
 
-    var selectedCategory by remember { mutableStateOf(primaryCategories[0]) }
+    var selectedCategory by remember(orderToEdit) {
+        mutableStateOf(orderToEdit?.orderType ?: primaryCategories[0])
+    }
     var isCategoryDropdownExpanded by remember { mutableStateOf(false) }
 
-    var selectedSubCategory by remember { mutableStateOf(goldSubCategories[0]) }
+    var selectedSubCategory by remember(orderToEdit) {
+        mutableStateOf(orderToEdit?.subCategory ?: goldSubCategories[0])
+    }
     var isSubCategoryDropdownExpanded by remember { mutableStateOf(false) }
 
-    var priceInput by remember { mutableStateOf("") }
+    var priceInput by remember(orderToEdit) {
+        mutableStateOf(orderToEdit?.let { "%.2f".format(it.approximatePrice) } ?: "")
+    }
     var priceError by remember { mutableStateOf(false) }
 
-    // Date Picker state (defaults to 3 days from now)
+    // Date Picker state
     val defaultDeliveryCalendar = remember {
         Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, 3) }
     }
-    var selectedDeliveryDateMillis by remember {
-        mutableStateOf(defaultDeliveryCalendar.timeInMillis)
+    var selectedDeliveryDateMillis by remember(orderToEdit) {
+        mutableStateOf(orderToEdit?.deliveryDateMillis ?: defaultDeliveryCalendar.timeInMillis)
     }
     var showDatePickerDialog by remember { mutableStateOf(false) }
 
     // Images state
-    val capturedImagePaths = remember { mutableStateListOf<String>() }
+    val capturedImagePaths = remember(orderToEdit) {
+        mutableStateListOf<String>().apply {
+            orderToEdit?.let { addAll(it.imagePaths) }
+        }
+    }
     var currentPhotoFile by remember { mutableStateOf<File?>(null) }
     var currentPhotoUri by remember { mutableStateOf<Uri?>(null) }
 
@@ -174,15 +184,18 @@ fun NewOrderScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "New Order",
-                        style = MaterialTheme.typography.headlineMedium.copy(
+                        text = if (isEditMode) "Edit Order" else "New Order",
+                        style = MaterialTheme.typography.titleLarge.copy(
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onPrimary
                         )
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
+                    IconButton(onClick = {
+                        viewModel.setOrderToEdit(null)
+                        onNavigateBack()
+                    }) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
                             contentDescription = "Back",
@@ -191,7 +204,7 @@ fun NewOrderScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = GoldDark
+                    containerColor = MaterialTheme.colorScheme.primary
                 )
             )
         }
@@ -206,7 +219,7 @@ fun NewOrderScreen(
         ) {
             // Heading in bold text at the top
             Text(
-                text = "New Order",
+                text = if (isEditMode) "Edit Order" else "New Order",
                 style = MaterialTheme.typography.headlineLarge.copy(
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface
@@ -225,7 +238,7 @@ fun NewOrderScreen(
                         readOnly = true,
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isCategoryDropdownExpanded) },
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = GoldDark,
+                            focusedBorderColor = MaterialTheme.colorScheme.primary,
                             unfocusedBorderColor = MaterialTheme.colorScheme.outline
                         ),
                         modifier = Modifier
@@ -271,7 +284,7 @@ fun NewOrderScreen(
                             readOnly = true,
                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isSubCategoryDropdownExpanded) },
                             colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = GoldDark,
+                                focusedBorderColor = MaterialTheme.colorScheme.primary,
                                 unfocusedBorderColor = MaterialTheme.colorScheme.outline
                             ),
                             modifier = Modifier
@@ -311,7 +324,6 @@ fun NewOrderScreen(
                 OutlinedTextField(
                     value = priceInput,
                     onValueChange = { input ->
-                        // Only allow numeric input with optional single decimal point
                         if (input.all { it.isDigit() || it == '.' }) {
                             priceInput = input
                             priceError = false
@@ -321,7 +333,7 @@ fun NewOrderScreen(
                         Icon(
                             imageVector = Icons.Default.CurrencyRupee,
                             contentDescription = "Rupees",
-                            tint = GoldDark
+                            tint = MaterialTheme.colorScheme.primary
                         )
                     },
                     placeholder = { Text("0.00") },
@@ -333,7 +345,7 @@ fun NewOrderScreen(
                         }
                     },
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = GoldDark,
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
                         unfocusedBorderColor = MaterialTheme.colorScheme.outline
                     ),
                     modifier = Modifier.fillMaxWidth()
@@ -346,7 +358,7 @@ fun NewOrderScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(12.dp))
-                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f))
+                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f))
                         .clickable { showDatePickerDialog = true }
                         .padding(16.dp)
                 ) {
@@ -375,7 +387,7 @@ fun NewOrderScreen(
                         Icon(
                             imageVector = Icons.Default.CalendarMonth,
                             contentDescription = "Pick date",
-                            tint = GoldDark,
+                            tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(28.dp)
                         )
                     }
@@ -387,7 +399,7 @@ fun NewOrderScreen(
                 Button(
                     onClick = { launchCamera() },
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = GoldDark
+                        containerColor = MaterialTheme.colorScheme.primary
                     ),
                     shape = RoundedCornerShape(12.dp),
                     modifier = Modifier.fillMaxWidth()
@@ -422,7 +434,6 @@ fun NewOrderScreen(
                                     modifier = Modifier.fillMaxSize()
                                 )
 
-                                // Remove button
                                 Box(
                                     modifier = Modifier
                                         .align(Alignment.TopEnd)
@@ -450,7 +461,7 @@ fun NewOrderScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Bottom button: "Save Order"
+            // Bottom button: "Save Order" / "Update Order"
             Button(
                 onClick = {
                     val amount = priceInput.toDoubleOrNull()
@@ -467,19 +478,21 @@ fun NewOrderScreen(
                     }
 
                     viewModel.saveOrder(
+                        existingOrderId = orderToEdit?.id,
                         orderType = selectedCategory,
                         subCategory = subCategoryToSave,
                         approximatePrice = amount,
                         deliveryDateMillis = selectedDeliveryDateMillis,
                         imagePaths = capturedImagePaths.toList(),
                         onSaved = {
-                            Toast.makeText(context, "Order saved successfully!", Toast.LENGTH_SHORT).show()
+                            val msg = if (isEditMode) "Order updated successfully!" else "Order saved successfully!"
+                            Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
                             onNavigateBack()
                         }
                     )
                 },
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = GoldDark
+                    containerColor = MaterialTheme.colorScheme.primary
                 ),
                 shape = RoundedCornerShape(14.dp),
                 modifier = Modifier
@@ -493,10 +506,10 @@ fun NewOrderScreen(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "Save Order",
+                    text = if (isEditMode) "Update Order" else "Save Order",
                     style = MaterialTheme.typography.titleMedium.copy(
                         fontWeight = FontWeight.Bold,
-                        color = Color.White
+                        color = MaterialTheme.colorScheme.onPrimary
                     )
                 )
             }
@@ -521,7 +534,7 @@ fun NewOrderScreen(
                         showDatePickerDialog = false
                     }
                 ) {
-                    Text("OK", color = GoldDark, fontWeight = FontWeight.Bold)
+                    Text("OK", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {

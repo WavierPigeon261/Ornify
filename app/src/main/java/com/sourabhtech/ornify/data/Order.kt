@@ -1,10 +1,10 @@
-package com.jewellery.shoporders.data
+package com.sourabhtech.ornify.data
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 /**
- * Entity representing a customer's jewellery order.
+ * Entity representing a jewellery order in Ornify.
  */
 @Entity(tableName = "orders")
 data class Order(
@@ -16,5 +16,6 @@ data class Order(
     val deliveryDateMillis: Long,
     val imagePaths: List<String> = emptyList(),
     val placedAtMillis: Long = System.currentTimeMillis(),
+    val modifiedAtMillis: Long? = null,
     val isCompleted: Boolean = false
 )

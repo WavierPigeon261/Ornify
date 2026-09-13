@@ -1,4 +1,4 @@
-package com.jewellery.shoporders
+package com.sourabhtech.ornify
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -11,10 +11,11 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.jewellery.shoporders.ui.OrderViewModel
-import com.jewellery.shoporders.ui.screens.DashboardScreen
-import com.jewellery.shoporders.ui.screens.NewOrderScreen
-import com.jewellery.shoporders.ui.theme.JewelleryShopOrdersTheme
+import com.sourabhtech.ornify.ui.OrderViewModel
+import com.sourabhtech.ornify.ui.screens.DashboardScreen
+import com.sourabhtech.ornify.ui.screens.HistoryScreen
+import com.sourabhtech.ornify.ui.screens.NewOrderScreen
+import com.sourabhtech.ornify.ui.theme.OrnifyTheme
 
 class MainActivity : ComponentActivity() {
 
@@ -23,7 +24,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            JewelleryShopOrdersTheme {
+            // Material You dynamic theming enabled by default
+            OrnifyTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
@@ -39,6 +41,12 @@ class MainActivity : ComponentActivity() {
                                 viewModel = viewModel,
                                 onNavigateToNewOrder = {
                                     navController.navigate("new_order")
+                                },
+                                onNavigateToHistory = {
+                                    navController.navigate("history")
+                                },
+                                onNavigateToEdit = {
+                                    navController.navigate("new_order")
                                 }
                             )
                         }
@@ -47,6 +55,17 @@ class MainActivity : ComponentActivity() {
                                 viewModel = viewModel,
                                 onNavigateBack = {
                                     navController.popBackStack()
+                                }
+                            )
+                        }
+                        composable("history") {
+                            HistoryScreen(
+                                viewModel = viewModel,
+                                onNavigateBack = {
+                                    navController.popBackStack()
+                                },
+                                onNavigateToEdit = {
+                                    navController.navigate("new_order")
                                 }
                             )
                         }

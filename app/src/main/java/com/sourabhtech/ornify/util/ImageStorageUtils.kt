@@ -1,4 +1,4 @@
-package com.jewellery.shoporders.util
+package com.sourabhtech.ornify.util
 
 import android.content.Context
 import android.net.Uri

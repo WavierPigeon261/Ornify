@@ -1,4 +1,4 @@
-package com.jewellery.shoporders.ui.theme
+package com.sourabhtech.ornify.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

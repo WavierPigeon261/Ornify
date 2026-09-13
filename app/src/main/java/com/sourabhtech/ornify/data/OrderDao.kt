@@ -1,4 +1,4 @@
-package com.jewellery.shoporders.data
+package com.sourabhtech.ornify.data
 
 import androidx.room.Dao
 import androidx.room.Delete
@@ -12,6 +12,9 @@ import kotlinx.coroutines.flow.Flow
 interface OrderDao {
     @Query("SELECT * FROM orders WHERE isCompleted = 0 ORDER BY placedAtMillis DESC")
     fun getPendingOrders(): Flow<List<Order>>
+
+    @Query("SELECT * FROM orders WHERE isCompleted = 1 ORDER BY COALESCE(modifiedAtMillis, placedAtMillis) DESC")
+    fun getCompletedOrders(): Flow<List<Order>>
 
     @Query("SELECT * FROM orders ORDER BY placedAtMillis DESC")
     fun getAllOrders(): Flow<List<Order>>
@@ -30,4 +33,7 @@ interface OrderDao {
 
     @Query("DELETE FROM orders WHERE id = :orderId")
     suspend fun deleteOrderById(orderId: Long)
+
+    @Query("DELETE FROM orders WHERE isCompleted = 1")
+    suspend fun deleteCompletedOrders()
 }

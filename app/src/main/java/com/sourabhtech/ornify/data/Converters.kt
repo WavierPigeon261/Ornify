@@ -1,4 +1,4 @@
-package com.jewellery.shoporders.data
+package com.sourabhtech.ornify.data
 
 import androidx.room.TypeConverter
 

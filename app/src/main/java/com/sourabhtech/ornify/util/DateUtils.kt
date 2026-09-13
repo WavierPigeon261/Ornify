@@ -1,4 +1,4 @@
-package com.jewellery.shoporders.util
+package com.sourabhtech.ornify.util
 
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
@@ -18,6 +18,14 @@ object DateUtils {
     }
 
     fun formatPlacedDate(millis: Long): String {
+        return try {
+            placedDateFormat.format(Date(millis))
+        } catch (e: Exception) {
+            ""
+        }
+    }
+
+    fun formatModifiedDate(millis: Long): String {
         return try {
             placedDateFormat.format(Date(millis))
         } catch (e: Exception) {
