@@ -38,12 +38,7 @@ This project is open source and available under the MIT License. See the [LICENS
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please feel free to:
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+Contributions are welcome! Please feel free to fork the repository, make your changes and open a pull request.
 
 ---
 
@@ -53,4 +48,4 @@ For questions, bug reports, or feature requests, please open an [issue](https://
 
 ---
 
-**Made with ❤️ by [WavierPigeon261](https://github.com/WavierPigeon261)**
+**Made with ❤️ by [Sourabh Shet](https://github.com/WavierPigeon261)**
