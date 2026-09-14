@@ -27,21 +27,7 @@
 - 🌓 Supports Android 12, 13, 14, and 15+
 - 🌙 Automatic light and dark theme switching
 - ✨ Warm gold palette fallback for older Android versions
-- 
----
-
-## 🛠️ Technology Stack
-
-| Technology | Purpose |
-|-----------|---------|
-| **Kotlin** | Primary language |
-| **Android Jetpack** | Modern Android development |
-| **Material You** | Dynamic theming |
-| **Room Database** | Local data persistence |
-| **View Binding** | Type-safe view access |
-| **Fragments** | UI modularity |
-| **GitHub Actions** | CI/CD automation |
-
+  
 ---
 
 ## 📝 License
