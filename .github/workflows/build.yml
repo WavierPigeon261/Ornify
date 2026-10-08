@@ -1,4 +1,4 @@
-name: Build Android APK
+name: Build Debug APK
 
 on:
   push:
@@ -6,6 +6,7 @@ on:
     paths-ignore:
       - 'README.md'
       - 'LICENSE'
+      - '.github/workflows/build.yml'
   pull_request:
     branches: [ "main", "master" ]
   workflow_dispatch:
