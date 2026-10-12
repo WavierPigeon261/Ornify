@@ -5,6 +5,8 @@ on:
     branches: [ "main", "master" ]
   pull_request:
     branches: [ "main", "master" ]
+  release:
+    types: [published, created]
   workflow_dispatch:
 
 jobs:
@@ -30,7 +32,7 @@ jobs:
           mkdir -p gradle/wrapper
           if [ ! -f gradle/wrapper/gradle-wrapper.jar ]; then
             echo "Downloading gradle-wrapper.jar..."
-            curl -sSL -o gradle/wrapper/gradle-wrapper.jar https://githubusercontent.com
+            curl -sSL -o gradle/wrapper/gradle-wrapper.jar https://raw.githubusercontent.com/gradle/gradle/master/gradle/wrapper/gradle-wrapper.jar
           fi
 
       - name: Make gradlew executable
@@ -39,9 +41,27 @@ jobs:
       - name: Build Release APK
         run: ./gradlew :app:assembleRelease --stacktrace
 
-      - name: Upload Release APK
+      - name: Sign APK
+        uses: r0adkll/sign-android-release@v1
+        id: sign_app
+        with:
+          releaseDirectory: app/build/outputs/apk/release
+          signingKeyBase64: ${{ secrets.KEYSTORE_BASE64 }}
+          alias: ${{ secrets.KEY_ALIAS }}
+          keyStorePassword: ${{ secrets.KEYSTORE_PASSWORD }}
+          keyPassword: ${{ secrets.KEY_PASSWORD }}
+
+      - name: Upload Signed APK to Release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ${{ steps.sign_app.outputs.signedReleaseFile }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Release APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: Ornify-Release-APK
-          path: app/build/outputs/apk/release/*-unsigned.apk
+          path: ${{ steps.sign_app.outputs.signedReleaseFile }}
           retention-days: 30
