@@ -4,17 +4,52 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <!-- Stylized jewellery diamond/ring icon in gold -->
-    <path
-        android:fillColor="#D4AF37"
-        android:pathData="M54,28 L68,44 L54,80 L40,44 Z" />
+    
+    <!-- Top Table / Crown Facets -->
+    <!-- Center Top Table -->
     <path
         android:fillColor="#F9E79F"
-        android:pathData="M54,28 L68,44 L54,44 Z" />
+        android:pathData="M38,26 L70,26 L78,38 L30,38 Z" />
+    
+    <!-- Left Top Crown Triangle -->
+    <path
+        android:fillColor="#D4AF37"
+        android:pathData="M34,26 L18,44 L32,44 Z" />
+    
+    <!-- Center-Left Crown Triangle -->
     <path
         android:fillColor="#E5C158"
-        android:pathData="M40,44 L54,44 L54,80 Z" />
+        android:pathData="M36,26 L34,44 L53,44 Z" />
+        
+    <!-- Center-Right Crown Triangle -->
+    <path
+        android:fillColor="#D4AF37"
+        android:pathData="M72,26 L74,44 L55,44 Z" />
+        
+    <!-- Right Top Crown Triangle -->
+    <path
+        android:fillColor="#C5A028"
+        android:pathData="M74,26 L90,44 L76,44 Z" />
+
+    <!-- Pavilion (Lower Facets converging at bottom) -->
+    <!-- Outer Left Pavilion -->
     <path
         android:fillColor="#B38F26"
-        android:pathData="M54,44 L68,44 L54,80 Z" />
+        android:pathData="M20,46 L54,92 L34,46 Z" />
+        
+    <!-- Inner Left Pavilion -->
+    <path
+        android:fillColor="#E5C158"
+        android:pathData="M36,46 L54,92 L53,46 Z" />
+        
+    <!-- Inner Right Pavilion -->
+    <path
+        android:fillColor="#F9E79F"
+        android:pathData="M55,46 L54,92 L72,46 Z" />
+        
+    <!-- Outer Right Pavilion -->
+    <path
+        android:fillColor="#C5A028"
+        android:pathData="M74,46 L54,92 L88,46 Z" />
+
 </vector>
