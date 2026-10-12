@@ -42,14 +42,12 @@ jobs:
         run: ./gradlew :app:assembleRelease --stacktrace
 
       - name: Sign APK
-        uses: r0adkll/sign-android-release@v1
+        uses: ilharp/sign-android-release@v2
         id: sign_app
-        env:
-          BUILD_TOOLS_VERSION: "34.0.0"
         with:
-          releaseDirectory: app/build/outputs/apk/release
-          signingKeyBase64: ${{ secrets.KEYSTORE_BASE64 }}
-          alias: ${{ secrets.KEY_ALIAS }}
+          releaseDir: app/build/outputs/apk/release
+          signingKey: ${{ secrets.KEYSTORE_BASE64 }}
+          keyAlias: ${{ secrets.KEY_ALIAS }}
           keyStorePassword: ${{ secrets.KEYSTORE_PASSWORD }}
           keyPassword: ${{ secrets.KEY_PASSWORD }}
 
@@ -57,7 +55,7 @@ jobs:
         if: github.event_name == 'release'
         uses: softprops/action-gh-release@v1
         with:
-          files: ${{ steps.sign_app.outputs.signedReleaseFile }}
+          files: ${{ steps.sign_app.outputs.signedFile }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -65,5 +63,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Ornify-Release-APK
-          path: ${{ steps.sign_app.outputs.signedReleaseFile }}
+          path: ${{ steps.sign_app.outputs.signedFile }}
           retention-days: 30
